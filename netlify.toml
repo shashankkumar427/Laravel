@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/*"
+  to = "https://locallaravel.tk/:splat"
+  status = 200
