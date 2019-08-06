@@ -1,4 +1,8 @@
-[[redirects]]
-  from = "/*"
-  to = "https://locallaravel.tk/:splat"
-  status = 200
+[build]
+
+command = "php artisan export"
+publish = "dist/"
+
+[build.environment]
+
+PHP_VERSION = "7.2"
