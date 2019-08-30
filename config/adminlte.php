@@ -123,12 +123,12 @@ return [
         'ACCOUNT SETTINGS',
         [
             'text' => 'Profile',
-            'url' => 'admin/settings',
+            'url' => 'admin/profile',
             'icon' => 'user',
         ],
         [
             'text' => 'Change Password',
-            'url' => 'admin/settings',
+            'url' => 'admin/change_password',
             'icon' => 'lock',
         ],
         [
