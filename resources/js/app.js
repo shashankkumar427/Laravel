@@ -41,7 +41,8 @@ const app = new Vue({
             .listen('MessageSent', (e) => {
                 this.messages.push({
                     message: e.message.message,
-                    user: e.user
+                    user: e.user,
+                    created_at: e.message.created_at,
                 });
             });
     },
@@ -52,9 +53,8 @@ const app = new Vue({
             });
         },
         addMessage(message) {
-            this.messages.push(message);
             axios.post('/messages', message).then(response => {
-                console.log(response.data);
+                this.messages.push(response.data);
             });
         }
     }

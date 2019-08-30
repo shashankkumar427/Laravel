@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
 use App\Message;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -27,8 +29,7 @@ class ChatsController extends Controller
 
     /**
      * Fetch all messages
-     *
-     * @return Message
+     * @return Message[]|Builder[]|Collection
      */
     public function fetchMessages()
     {
@@ -37,20 +38,17 @@ class ChatsController extends Controller
 
     /**
      * Persist message to database
-     *
      * @param Request $request
-     * @return Response
+     * @return array
      */
     public function sendMessage(Request $request)
     {
         $user = Auth::user();
-
         $message = $user->messages()->create([
             'message' => $request->input('message')
         ]);
-
         broadcast(new MessageSent($user, $message))->toOthers();
-
-        return ['status' => 'Message Sent!'];
+        return Message::with('user')->where('id', $message['id'])->first();
+        //return ['status' => 'Message Sent!', 'user' => $user, 'message' => $message];
     }
 }

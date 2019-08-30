@@ -1384,7 +1384,7 @@ module.exports = function spread(callback) {
 
 
 var bind = __webpack_require__(/*! ./helpers/bind */ "./node_modules/axios/lib/helpers/bind.js");
-var isBuffer = __webpack_require__(/*! is-buffer */ "./node_modules/is-buffer/index.js");
+var isBuffer = __webpack_require__(/*! is-buffer */ "./node_modules/axios/node_modules/is-buffer/index.js");
 
 /*global toString:true*/
 
@@ -1688,6 +1688,28 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/axios/node_modules/is-buffer/index.js":
+/*!************************************************************!*\
+  !*** ./node_modules/axios/node_modules/is-buffer/index.js ***!
+  \************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+module.exports = function isBuffer (obj) {
+  return obj != null && obj.constructor != null &&
+    typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ChatForm.vue?vue&type=script&lang=js&":
 /*!*******************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ChatForm.vue?vue&type=script&lang=js& ***!
@@ -1747,11 +1769,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
-  props: ['messages'],
+  props: ['messages', 'user'],
   methods: {
     getImgUrl: function getImgUrl(userImageUrl) {
       return userImageUrl;
+    },
+    mainDivcheckRightLeft: function mainDivcheckRightLeft(messageUserId, loggedInUser) {
+      if (messageUserId == loggedInUser) return "right";else return "";
+    },
+    nameDivcheckRightLeft: function nameDivcheckRightLeft(messageUserId, loggedInUser) {
+      if (messageUserId == loggedInUser) return "pull-right";else return "pull-left";
+    },
+    timeDivcheckRightLeft: function timeDivcheckRightLeft(messageUserId, loggedInUser) {
+      if (messageUserId == loggedInUser) return "pull-left";else return "pull-right";
     }
   }
 });
@@ -6232,28 +6264,6 @@ __webpack_require__.r(__webpack_exports__);
 
 }));
 //# sourceMappingURL=bootstrap.js.map
-
-
-/***/ }),
-
-/***/ "./node_modules/is-buffer/index.js":
-/*!*****************************************!*\
-  !*** ./node_modules/is-buffer/index.js ***!
-  \*****************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-/*!
- * Determine if an object is a Buffer
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-
-module.exports = function isBuffer (obj) {
-  return obj != null && obj.constructor != null &&
-    typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
 
 
 /***/ }),
@@ -47411,29 +47421,46 @@ var render = function() {
     "div",
     { staticClass: "direct-chat-messages" },
     _vm._l(_vm.messages, function(message) {
-      return _c("div", { staticClass: "direct-chat-msg" }, [
-        _c("div", { staticClass: "direct-chat-info clearfix" }, [
-          _c("span", { staticClass: "direct-chat-name pull-left" }, [
-            _vm._v(_vm._s(message.user.name))
+      return _c(
+        "div",
+        {
+          staticClass: "direct-chat-msg",
+          class: _vm.mainDivcheckRightLeft(message.user.id, _vm.user.id)
+        },
+        [
+          _c("div", { staticClass: "direct-chat-info clearfix" }, [
+            _c(
+              "span",
+              {
+                staticClass: "direct-chat-name",
+                class: _vm.nameDivcheckRightLeft(message.user.id, _vm.user.id)
+              },
+              [_vm._v(_vm._s(message.user.name))]
+            ),
+            _vm._v(" "),
+            _c(
+              "span",
+              {
+                staticClass: "direct-chat-timestamp",
+                class: _vm.timeDivcheckRightLeft(message.user.id, _vm.user.id)
+              },
+              [_vm._v(_vm._s(message.created_at))]
+            )
           ]),
           _vm._v(" "),
-          _c("span", { staticClass: "direct-chat-timestamp pull-right" }, [
-            _vm._v(_vm._s(message.created_at) + " 23 Jan 2:00 pm")
+          _c("img", {
+            staticClass: "direct-chat-img",
+            attrs: {
+              src: _vm.getImgUrl(message.user.image),
+              alt: "message user image"
+            }
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "direct-chat-text" }, [
+            _vm._v(_vm._s(message.message))
           ])
-        ]),
-        _vm._v(" "),
-        _c("img", {
-          staticClass: "direct-chat-img",
-          attrs: {
-            src: _vm.getImgUrl(message.user.image),
-            alt: "message user image"
-          }
-        }),
-        _vm._v(" "),
-        _c("div", { staticClass: "direct-chat-text" }, [
-          _vm._v(_vm._s(message.message))
-        ])
-      ])
+        ]
+      )
     }),
     0
   )
@@ -59674,7 +59701,8 @@ var app = new Vue({
     Echo["private"]('chat').listen('MessageSent', function (e) {
       _this.messages.push({
         message: e.message.message,
-        user: e.user
+        user: e.user,
+        created_at: e.message.created_at
       });
     });
   },
@@ -59687,9 +59715,10 @@ var app = new Vue({
       });
     },
     addMessage: function addMessage(message) {
-      this.messages.push(message);
+      var _this3 = this;
+
       axios.post('/messages', message).then(function (response) {
-        console.log(response.data);
+        _this3.messages.push(response.data);
       });
     }
   }
