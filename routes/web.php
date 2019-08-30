@@ -14,7 +14,8 @@ Route::get('/', function () {
 });
 Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('admin/profile', 'HomeController@profile');
+Route::get('admin/profile', 'HomeController@profile')->name('profile');
+Route::any('admin/change_password', 'HomeController@change_password')->name('change_password');
 
 /*Social Login*/
 
